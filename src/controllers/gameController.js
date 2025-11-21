@@ -13,10 +13,40 @@ exports.getGameConfig = (req, res) => {
 // Obtenemos preguntas para el juego
 exports.getQuestions = async (req, res) => {
   try {
-    // Consulta SQL para obtener 15 preguntas aleatorias
-    const [questions] = await db.query('SELECT * FROM questions ORDER BY RAND() LIMIT 15');
+    // Obtener todas las categorías del query string (pueden ser múltiples)
+    const categories = req.query.category;
+    
+    let sql = 'SELECT * FROM questions';
+    let params = [];
+    
+    // Si se especifican categorías (puede ser un string o array)
+    if (categories) {
+      const categoryArray = Array.isArray(categories) ? categories : [categories];
+      
+      // Filtrar por múltiples categorías usando IN
+      if (categoryArray.length > 0 && !categoryArray.includes('all')) {
+        const placeholders = categoryArray.map(() => '?').join(',');
+        sql += ` WHERE category IN (${placeholders})`;
+        params.push(...categoryArray);
+      }
+    }
+    
+    sql += ' ORDER BY RAND() LIMIT 15';
+    
+    const [questions] = await db.query(sql, params);
     // El driver mysql2 automáticamente parsea los campos JSON
     res.json(questions);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Obtenemos las categorías únicas disponibles
+exports.getCategories = async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT DISTINCT category FROM questions ORDER BY category ASC');
+    const categories = rows.map(row => row.category);
+    res.json({ categories });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
