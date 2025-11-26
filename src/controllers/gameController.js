@@ -82,3 +82,14 @@ exports.getHighScores = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// Obtenemos todas las sesiones de juego para el historial
+exports.getGameSessions = async (req, res) => {
+  try {
+    const sql = 'SELECT id, playerName, score, timeTaken, result, createdAt FROM game_sessions ORDER BY createdAt DESC';
+    const [sessions] = await db.query(sql);
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

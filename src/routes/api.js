@@ -16,6 +16,9 @@ router.get('/questions/categories', gameController.getCategories);
 // POST /api/game/session -> Guarda el resultado de una partida
 router.post('/game/session', gameController.saveGameSession);
 
+// GET /api/game/sessions -> Devuelve todas las sesiones de juego
+router.get('/game/sessions', gameController.getGameSessions);
+
 // GET /api/scores -> Devuelve las mejores puntuaciones
 router.get('/scores', gameController.getHighScores);
 
